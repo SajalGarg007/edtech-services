@@ -7,8 +7,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +18,14 @@ import java.util.List;
 @Entity
 @Table(name = "providers")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Provider {
+public class Provider extends BaseEntity
+        implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private static final long serialVersionUID = -8026564716164294260L;
 
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Email is required")
@@ -50,6 +52,7 @@ public class Provider {
 
     @PrePersist
     protected void onCreate() {
+        generateInternalId(); // Generate UUID from BaseEntity
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

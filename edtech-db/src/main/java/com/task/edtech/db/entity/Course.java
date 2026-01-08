@@ -5,8 +5,10 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,14 +16,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "courses")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course {
+public class Course extends BaseEntity
+        implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private static final long serialVersionUID = -5075736936745304781L;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
@@ -88,6 +90,7 @@ public class Course {
 
     @PrePersist
     protected void onCreate() {
+        generateInternalId();
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
@@ -97,17 +100,15 @@ public class Course {
         updatedAt = LocalDateTime.now();
     }
 
-    // Validation for in-person courses
     @AssertTrue(message = "Address and PIN code are required for in-person courses")
     private boolean isValidInPersonCourse() {
         if (mode == CourseMode.IN_PERSON) {
-            return address != null && !address.isBlank() && 
-                   pinCode != null && !pinCode.isBlank();
+            return address != null && !address.isBlank() &&
+                    pinCode != null && !pinCode.isBlank();
         }
         return true;
     }
 
-    // Validation for price
     @AssertTrue(message = "Price amount is required for paid courses")
     private boolean isValidPrice() {
         if (!isFree && priceAmount == null) {
