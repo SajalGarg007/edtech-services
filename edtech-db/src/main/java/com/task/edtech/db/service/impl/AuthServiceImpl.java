@@ -4,8 +4,8 @@ import com.task.edtech.db.dto.AuthResponse;
 import com.task.edtech.db.dto.LoginRequest;
 import com.task.edtech.db.dto.ProviderResponse;
 import com.task.edtech.db.dto.SignupRequest;
-import com.task.edtech.db.entity.Provider;
-import com.task.edtech.db.repository.ProviderRepository;
+import com.task.edtech.db.entity.User;
+import com.task.edtech.db.repository.UserRepository;
 import com.task.edtech.db.security.JwtUtil;
 import com.task.edtech.db.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class AuthServiceImpl
         implements AuthService {
 
     @Autowired
-    private ProviderRepository providerRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -34,17 +34,17 @@ public class AuthServiceImpl
     @Override
     public AuthResponse signup(SignupRequest signupRequest) {
 
-        if (providerRepository.existsByEmail(signupRequest.getEmail())) {
+        if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
 
-        Provider provider = Provider.builder()
+        User provider = User.builder()
                 .email(signupRequest.getEmail())
                 .passwordHash(passwordEncoder.encode(signupRequest.getPassword()))
                 .name(signupRequest.getName())
                 .build();
 
-        Provider savedProvider = providerRepository.save(provider);
+        User savedProvider = userRepository.save(provider);
 
         String token = jwtUtil.generateToken(savedProvider.getEmail(), savedProvider.getId());
 
@@ -60,13 +60,13 @@ public class AuthServiceImpl
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
 
-        Optional<Provider> providerOpt = providerRepository.findByEmail(loginRequest.getEmail());
+        Optional<User> providerOpt = userRepository.findByEmail(loginRequest.getEmail());
 
         if (providerOpt.isEmpty()) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        Provider provider = providerOpt.get();
+        User provider = providerOpt.get();
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), provider.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
@@ -84,7 +84,7 @@ public class AuthServiceImpl
     }
 
     @Override
-    public Provider getCurrentProvider() {
+    public User getCurrentProvider() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -93,7 +93,7 @@ public class AuthServiceImpl
 
         String email = authentication.getName();
 
-        Optional<Provider> providerOpt = providerRepository.findByEmail(email);
+        Optional<User> providerOpt = userRepository.findByEmail(email);
 
         if (providerOpt.isEmpty()) {
             throw new RuntimeException("Provider not found");

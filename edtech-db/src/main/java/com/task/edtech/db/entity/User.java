@@ -1,5 +1,6 @@
 package com.task.edtech.db.entity;
 
+import com.task.edtech.db.enums.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,17 +13,15 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "providers")
+@Table(name = "users")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Provider extends BaseEntity
+public class User extends BaseEntity
         implements Serializable {
 
     private static final long serialVersionUID = -8026564716164294260L;
@@ -40,15 +39,17 @@ public class Provider extends BaseEntity
     @NotBlank(message = "Name is required")
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type", nullable = false)
+    @NotNull(message = "User type is required")
+    private UserType userType;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @NotNull
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Course> courses = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

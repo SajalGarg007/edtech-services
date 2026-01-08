@@ -1,5 +1,8 @@
 package com.task.edtech.db.entity;
 
+import com.task.edtech.db.enums.CourseCategory;
+import com.task.edtech.db.enums.CourseMode;
+import com.task.edtech.db.enums.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -26,9 +29,9 @@ public class Course extends BaseEntity
     private static final long serialVersionUID = -5075736936745304781L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "provider_id", nullable = false)
-    @NotNull(message = "Provider is required")
-    private Provider provider;
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "user is required")
+    private User user;
 
     @Column(nullable = false)
     @NotBlank(message = "Title is required")
@@ -118,6 +121,11 @@ public class Course extends BaseEntity
             return false;
         }
         return true;
+    }
+
+    @AssertTrue(message = "User must be a PROVIDER to create courses")
+    private boolean isValidUserType() {
+        return user != null && user.getUserType() == UserType.PROVIDER;
     }
 }
 

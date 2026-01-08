@@ -3,7 +3,7 @@ package com.task.edtech.db.service;
 import com.task.edtech.db.dto.AuthResponse;
 import com.task.edtech.db.dto.LoginRequest;
 import com.task.edtech.db.dto.SignupRequest;
-import com.task.edtech.db.entity.Provider;
+import com.task.edtech.db.entity.User;
 
 public interface AuthService {
 
@@ -28,7 +28,7 @@ public interface AuthService {
      * @return Provider entity
      * @throws RuntimeException if no provider is authenticated
      */
-    Provider getCurrentProvider();
+    User getCurrentProvider();
 
     /**
      * Get current provider ID from SecurityContext

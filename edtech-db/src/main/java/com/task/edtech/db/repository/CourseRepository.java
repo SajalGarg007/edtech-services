@@ -1,8 +1,8 @@
 package com.task.edtech.db.repository;
 
 import com.task.edtech.db.entity.Course;
-import com.task.edtech.db.entity.CourseCategory;
-import com.task.edtech.db.entity.CourseMode;
+import com.task.edtech.db.enums.CourseCategory;
+import com.task.edtech.db.enums.CourseMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,16 +16,21 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
-    List<Course> findByProviderId(Long providerId);
+    @Query("SELECT c FROM Course c WHERE c.user.id = :userId")
+    List<Course> findByUser_Id(@Param("userId") Long userId);
 
-    Page<Course> findByProviderId(Long providerId, Pageable pageable);
+    @Query("SELECT c FROM Course c WHERE c.user.id = :userId")
+    Page<Course> findByUser_Id(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("SELECT c FROM Course c WHERE c.pinCode LIKE CONCAT(:pinPrefix, '%') " +
+           "AND c.isPublished = true AND c.startDate >= :date")
     List<Course> findByPinCodeStartingWithAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            String pinPrefix, LocalDate date);
-    
+            @Param("pinPrefix") String pinPrefix, @Param("date") LocalDate date);
 
+    @Query("SELECT c FROM Course c WHERE c.pinCode = :pinCode " +
+           "AND c.isPublished = true AND c.startDate >= :date")
     List<Course> findByPinCodeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            String pinCode, LocalDate date);
+            @Param("pinCode") String pinCode, @Param("date") LocalDate date);
 
     @Query("SELECT c FROM Course c WHERE " +
            "c.isPublished = true AND " +
@@ -45,15 +50,28 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             @Param("startTo") LocalDate startTo,
             Pageable pageable);
 
+    @Query("SELECT c FROM Course c WHERE c.category = :category " +
+           "AND c.isPublished = true AND c.startDate >= :date")
     Page<Course> findByCategoryAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            CourseCategory category, LocalDate date, Pageable pageable);
+            @Param("category") CourseCategory category, 
+            @Param("date") LocalDate date, 
+            Pageable pageable);
 
+    @Query("SELECT c FROM Course c WHERE c.mode = :mode " +
+           "AND c.isPublished = true AND c.startDate >= :date")
     Page<Course> findByModeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            CourseMode mode, LocalDate date, Pageable pageable);
+            @Param("mode") CourseMode mode, 
+            @Param("date") LocalDate date, 
+            Pageable pageable);
 
+    @Query("SELECT c FROM Course c WHERE c.isFree = :isFree " +
+           "AND c.isPublished = true AND c.startDate >= :date")
     Page<Course> findByIsFreeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            Boolean isFree, LocalDate date, Pageable pageable);
+            @Param("isFree") Boolean isFree, 
+            @Param("date") LocalDate date, 
+            Pageable pageable);
 
-    long countByProviderId(Long providerId);
+    @Query("SELECT COUNT(c) FROM Course c WHERE c.user.id = :userId")
+    long countByUser_Id(@Param("userId") Long userId);
 }
 

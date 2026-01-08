@@ -1,4 +1,4 @@
-package com.task.edtech.db.entity;
+package com.task.edtech.db.enums;
 
 public enum CourseCategory {
     YOGA,
