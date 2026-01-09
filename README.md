@@ -2,7 +2,267 @@
 
 ## 📋 Project Overview
 
-A web application that connects course providers (people/organizations running courses) with learners (users searching for courses). Providers can create and manage courses, while learners can search for courses by PIN code and browse results.
+EdTech Services is a Spring Boot REST API backend for an EdTech course platform. It provides APIs for course providers to create and manage courses, and for learners to search for courses by PIN code. The system uses JWT-based authentication and supports role-based access control (PROVIDER and LEARNER roles).
+
+---
+
+## 📁 Project Structure
+
+### Multi-Module Maven Project
+
+```
+edtech.services/
+├── pom.xml                          # Parent POM
+├── README.md                        # This file
+├── JWT_AUTHENTICATION_FLOW.md      # JWT authentication documentation
+│
+├── edtech-db/                       # Database Layer Module
+│   ├── pom.xml
+│   └── src/main/java/com/task/edtech/db/
+│       ├── converter/               # Entity-DTO converters
+│       │   ├── CourseConverter.java
+│       │   └── UserConverter.java
+│       ├── dto/                     # Data Transfer Objects
+│       │   ├── AuthResponse.java
+│       │   ├── CourseDTO.java
+│       │   ├── LoginRequest.java
+│       │   ├── SearchFilters.java
+│       │   ├── SignupRequest.java
+│       │   └── UserDTO.java
+│       ├── entity/                  # JPA Entities
+│       │   ├── BaseEntity.java
+│       │   ├── Course.java
+│       │   └── User.java
+│       ├── enums/                   # Enumerations
+│       │   ├── CourseCategory.java
+│       │   ├── CourseMode.java
+│       │   └── UserType.java
+│       ├── exception/               # Custom Exceptions
+│       │   └── EntityNotFoundException.java
+│       ├── repository/              # Spring Data JPA Repositories
+│       │   ├── CourseRepository.java
+│       │   └── UserRepository.java
+│       ├── security/                # Security Utilities
+│       │   └── JwtUtil.java
+│       └── service/                 # Business Logic Services
+│           ├── AuthService.java
+│           ├── CourseService.java
+│           ├── UserService.java
+│           └── impl/
+│               ├── AuthServiceImpl.java
+│               ├── CourseServiceImpl.java
+│               └── UserServiceImpl.java
+│
+├── edtech-api/                      # REST API Layer Module
+│   ├── pom.xml
+│   └── src/main/java/com/task/edtech/api/
+│       └── controller/              # REST Controllers
+│           ├── AuthController.java
+│           └── CourseController.java
+│
+└── edtech-application/              # Application Layer Module
+    ├── pom.xml
+    └── src/main/
+        ├── java/com/task/edtech/services/
+        │   ├── Application.java     # Main Spring Boot Application
+        │   ├── config/              # Configuration Classes
+        │   │   └── JpaConfig.java
+        │   └── security/            # Security Configuration
+        │       ├── JwtAuthenticationFilter.java
+        │       └── SecurityConfig.java
+        └── resources/
+            ├── application.properties
+            └── application-local.properties  # Local configuration (gitignored)
+```
+
+### Module Responsibilities
+
+- **edtech-db**: Database layer containing entities, repositories, services, DTOs, converters, and security utilities
+- **edtech-api**: REST API layer containing all REST controllers
+- **edtech-application**: Application layer containing the main Spring Boot application class, security configuration, and application properties
+
+### Package Structure Details
+
+**edtech-db Module:**
+- `converter/` - Converts between entities and DTOs
+- `dto/` - Data Transfer Objects for API requests/responses
+- `entity/` - JPA entities representing database tables
+- `enums/` - Enumeration types (UserType, CourseMode, CourseCategory)
+- `exception/` - Custom exception classes
+- `repository/` - Spring Data JPA repository interfaces
+- `security/` - JWT utility classes
+- `service/` - Service interfaces and implementations
+
+**edtech-api Module:**
+- `controller/` - REST controllers handling HTTP requests
+
+**edtech-application Module:**
+- `Application.java` - Main Spring Boot application entry point
+- `config/` - Configuration classes (JPA, etc.)
+- `security/` - Security configuration and filters
+
+---
+
+## 🚀 Quick Start Guide
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+1. **Java 21** or higher
+   ```bash
+   java -version
+   ```
+   Should show version 21 or higher
+
+2. **Maven 3.6+**
+   ```bash
+   mvn -version
+   ```
+
+3. **PostgreSQL 12+**
+   ```bash
+   psql --version
+   ```
+
+4. **Git** (for cloning the repository)
+   ```bash
+   git --version
+   ```
+
+### Step 1: Clone the Repository
+
+```bash
+git clone <repository-url>
+cd edtech.services
+```
+
+### Step 2: Database Setup
+
+1. **Start PostgreSQL service**
+   ```bash
+   # Windows
+   net start postgresql-x64-XX
+   
+   # Linux/Mac
+   sudo systemctl start postgresql
+   # or
+   brew services start postgresql
+   ```
+
+2. **Create the database**
+   ```bash
+   psql -U postgres
+   ```
+   ```sql
+   CREATE DATABASE edtech_db;
+   ```
+
+3. **Verify database creation**
+   ```bash
+   psql -U postgres -d edtech_db -c "\dt"
+   ```
+
+### Step 3: Configure Application Properties
+
+1. **Create local properties file** (if not exists)
+   ```bash
+   cd edtech-application/src/main/resources
+   ```
+
+2. **Edit `application-local.properties`** with your database credentials:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/edtech_db
+   spring.datasource.username=postgres
+   spring.datasource.password=your_postgres_password
+   app.jwt.secret=your_jwt_secret_key_minimum_256_bits_for_hmac_sha_algorithms
+   app.jwt.expiration=86400000
+   ```
+
+   **Important:** 
+   - Replace `your_postgres_password` with your actual PostgreSQL password
+   - Generate a secure JWT secret (at least 256 bits/32 characters)
+   - Ensure `application-local.properties` is in `.gitignore`
+
+3. **Update `application.properties`** if needed:
+   ```properties
+   spring.profiles.active=local
+   server.port=8080
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.show-sql=false
+   spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   ```
+
+### Step 4: Build the Project
+
+1. **Navigate to project root**
+   ```bash
+   cd edtech.services
+   ```
+
+2. **Build all modules**
+   ```bash
+   mvn clean install
+   ```
+
+   This will:
+   - Download all dependencies
+   - Compile all modules
+   - Run tests (if any)
+   - Package the application
+
+### Step 5: Run the Application
+
+1. **Run from Maven** (recommended for development)
+   ```bash
+   cd edtech-application
+   mvn spring-boot:run
+   ```
+
+   Or from the root directory:
+   ```bash
+   mvn spring-boot:run -pl edtech-application
+   ```
+
+2. **Run from JAR** (after building)
+   ```bash
+   java -jar edtech-application/target/edtech-application-0.0.1-SNAPSHOT.jar
+   ```
+
+3. **Verify the application is running**
+   - Check console logs for: `Started Application in X.XXX seconds`
+   - Open browser: `http://localhost:8080`
+   - Check health: `http://localhost:8080/api/auth/signup` (should return 400 Bad Request, not 404)
+
+
+### Step 6: Test the API
+
+1. **Test Signup Endpoint**
+   ```bash
+   curl -X POST http://localhost:8080/api/auth/signup \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "Test Provider",
+       "email": "provider@test.com",
+       "password": "password123",
+       "userType": "PROVIDER"
+     }'
+   ```
+
+2. **Test Login Endpoint**
+   ```bash
+   curl -X POST http://localhost:8080/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "provider@test.com",
+       "password": "password123"
+     }'
+   ```
+
+3. **Test Search Endpoint** (public, no auth required)
+   ```bash
+   curl http://localhost:8080/api/courses/search?pinCode=560066
+   ```
 
 ---
 
@@ -10,50 +270,37 @@ A web application that connects course providers (people/organizations running c
 
 ### Technology Stack
 
-**Backend:**
-- Java 21
-- Spring Boot 4.0.1
-- Spring Data JPA
-- PostgreSQL Database
-- Spring Security (for authentication)
-- JWT (JSON Web Tokens) for authentication
-- Maven (build tool - multi-module project)
-- Lombok (for reducing boilerplate code)
-
-**Frontend:**
-- React (with Vite or Create React App)
-- React Router (for navigation)
-- Axios or Fetch API (for HTTP requests)
-- Modern CSS framework (Tailwind CSS or Material-UI)
-
-### Project Structure (Multi-Module Maven)
-
-```
-edtech-parent/
-├── edtech-db/          # Database layer (entities, repositories, services, DTOs, converters)
-├── edtech-api/         # REST API layer (controllers)
-└── edtech-application/ # Application layer (main class, security config, application properties)
-```
-
-**Module Responsibilities:**
-- **edtech-db**: Contains all database-related code (entities, repositories, services, DTOs, converters, security utilities)
-- **edtech-api**: Contains REST controllers for API endpoints
-- **edtech-application**: Contains the main Spring Boot application class, security configuration, and application properties
+- **Java 21** - Programming language
+- **Spring Boot 4.0.1** - Application framework
+- **Spring Data JPA** - Data persistence
+- **PostgreSQL** - Relational database
+- **Spring Security** - Authentication and authorization
+- **JWT (JSON Web Tokens)** - Stateless authentication
+- **Maven** - Build tool and dependency management
+- **Lombok** - Boilerplate code reduction
 
 ### System Architecture
 
 ```
-┌─────────────────┐         ┌─────────────────┐
-│   React Frontend │ ◄─────► │  Spring Boot    │
-│   (Port 3000)    │  HTTP   │  REST API       │
-│                  │         │  (Port 8080)    │
-└─────────────────┘         └────────┬────────┘
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │  PostgreSQL  │
-                              │  Database    │
-                              └──────────────┘
+┌─────────────────────┐
+│   REST API Clients  │
+│  (Postman, curl,    │
+│   Frontend Apps)    │
+└──────────┬──────────┘
+           │ HTTP/REST
+           ▼
+┌─────────────────────┐
+│   Spring Boot       │
+│   REST API          │
+│   (Port 8080)       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│   PostgreSQL        │
+│   Database          │
+│   (Port 5432)       │
+└─────────────────────┘
 ```
 
 ---
@@ -194,74 +441,85 @@ User (1) ────< (Many) Course
      }
      ```
 
+4. **POST /api/auth/logout** (Protected)
+   - Headers: `Authorization: Bearer <token>`
+   - Response: `200 OK`
+   - **Note:** Clears server-side security context. Client should remove token from storage.
+
 #### **Course Management Endpoints** (Protected - Requires JWT)
 
 **Note:** All course management endpoints require authentication and only users with `UserType.PROVIDER` can create courses.
 
-4. **POST /api/courses**
+5. **POST /api/courses**
    - Headers: `Authorization: Bearer <token>`
    - Request Body: CourseDTO object (see below)
    - Response: Created course object (CourseDTO)
    - **Validation:** Only users with `userType: "PROVIDER"` can create courses
 
-5. **GET /api/courses/mine**
+6. **GET /api/courses/mine**
    - Headers: `Authorization: Bearer <token>`
    - Response: Array of user's courses (CourseDTO[])
 
-6. **GET /api/courses/{id}**
+7. **GET /api/courses/{id}**
    - Headers: `Authorization: Bearer <token>`
    - Response: Course detail object (CourseDTO)
    - **Security:** Only returns course if user owns it
 
-7. **PUT /api/courses/{id}**
+8. **PUT /api/courses/{id}**
    - Headers: `Authorization: Bearer <token>`
    - Request Body: CourseDTO object
    - Response: Updated course object (CourseDTO)
    - **Security:** Only allows update if user owns the course
 
-8. **DELETE /api/courses/{id}**
+9. **DELETE /api/courses/{id}**
    - Headers: `Authorization: Bearer <token>`
    - Response: 204 No Content
    - **Security:** Only allows deletion if user owns the course
 
-9. **POST /api/courses/{id}/publish**
-   - Headers: `Authorization: Bearer <token>`
-   - Response: Updated course with `isPublished: true` (CourseDTO)
-   - **Security:** Only allows publish if user owns the course
+10. **POST /api/courses/{id}/publish**
+    - Headers: `Authorization: Bearer <token>`
+    - Response: Updated course with `isPublished: true` (CourseDTO)
+    - **Security:** Only allows publish if user owns the course
 
-10. **POST /api/courses/{id}/unpublish**
+11. **POST /api/courses/{id}/unpublish**
     - Headers: `Authorization: Bearer <token>`
     - Response: Updated course with `isPublished: false` (CourseDTO)
     - **Security:** Only allows unpublish if user owns the course
 
 #### **Learner Search Endpoints** (Public - No Authentication Required)
 
-11. **GET /api/courses/search**
+12. **GET /api/courses/search**
     - Query Parameters:
-      - `pinCode` (required): PIN code to search
+      - `pinCode` (optional): PIN code to search (prefix match)
       - `filterPinCode` (optional): Override search PIN code
       - `category` (optional): Filter by CourseCategory enum value
       - `mode` (optional): "ONLINE" or "IN_PERSON"
       - `isFree` (optional): true/false
       - `startFrom` (optional): Start date filter (YYYY-MM-DD format)
       - `startTo` (optional): End date filter (YYYY-MM-DD format)
-      - `page` (optional): Page number (default: 0)
-      - `size` (optional): Page size (default: 10)
-      - `sortBy` (optional): Sort field (default: "startDate")
-      - `sortDir` (optional): Sort direction - "ASC" or "DESC" (default: "ASC")
-    - Response: Paginated list of published courses
+    - Response: List of published courses (not paginated)
       ```json
-      {
-        "content": [CourseDTO[]],
-        "totalElements": number,
-        "totalPages": number,
-        "number": number,
-        "size": number,
-        "first": boolean,
-        "last": boolean
-      }
+      [
+        {
+          "title": "Yoga for Beginners",
+          "description": "Learn basic yoga poses",
+          "category": "YOGA",
+          "mode": "IN_PERSON",
+          "address": "123 Main St",
+          "pinCode": "110001",
+          "startDate": "2025-02-01",
+          "endDate": "2025-02-28",
+          "scheduleInfo": "Mon-Fri 6-7pm",
+          "priceAmount": 5000.00,
+          "isFree": false,
+          "capacity": 20
+        }
+      ]
       ```
-    - **Note:** Only returns published courses with `startDate >= today`
+    - **Note:** 
+      - Only returns published courses with `startDate >= today` (or `startFrom` if provided)
+      - If `pinCode` is not provided, returns all published courses matching other filters
+      - Results are sorted by `startDate` ascending
 
 ### Request/Response Examples
 
@@ -295,30 +553,22 @@ User (1) ────< (Many) Course
 
 **Course Search Response:**
 ```json
-{
-  "content": [
-    {
-      "title": "Yoga for Beginners",
-      "description": "Learn basic yoga poses",
-      "category": "YOGA",
-      "mode": "IN_PERSON",
-      "address": "123 Main St",
-      "pinCode": "110001",
-      "startDate": "2025-02-01",
-      "endDate": "2025-02-28",
-      "scheduleInfo": "Mon-Fri 6-7pm",
-      "priceAmount": 5000.00,
-      "isFree": false,
-      "capacity": 20
-    }
-  ],
-  "totalElements": 1,
-  "totalPages": 1,
-  "number": 0,
-  "size": 10,
-  "first": true,
-  "last": true
-}
+[
+  {
+    "title": "Yoga for Beginners",
+    "description": "Learn basic yoga poses",
+    "category": "YOGA",
+    "mode": "IN_PERSON",
+    "address": "123 Main St",
+    "pinCode": "110001",
+    "startDate": "2025-02-01",
+    "endDate": "2025-02-28",
+    "scheduleInfo": "Mon-Fri 6-7pm",
+    "priceAmount": 5000.00,
+    "isFree": false,
+    "capacity": 20
+  }
+]
 ```
 
 ---
@@ -335,253 +585,26 @@ User (1) ────< (Many) Course
 - Default sort: `start_date` ascending (earliest first)
 - Filters are applied in combination (AND logic)
 - Date range filter: `startFrom` and `startTo` filter courses by `start_date`
-- All filters are optional except `pinCode`
+- All filters are optional (including `pinCode`)
+- If `pinCode` is not provided, search returns all published courses matching other filters
 
 ---
 
-## 🛠️ Step-by-Step Backend Build Instructions
+## 💻 Development Setup
 
-### Phase 1: Project Setup & Dependencies
+### IDE Configuration
 
-#### Step 1.1: Verify Prerequisites
-- Ensure Java 21 is installed (`java -version`)
-- Ensure Maven is installed (`mvn -version`)
-- Ensure PostgreSQL is installed and running
-- Create a database named `edtech_db` in PostgreSQL
+**IntelliJ IDEA Setup:**
+1. Open project: `File > Open > Select edtech.services folder`
+2. Wait for Maven to import dependencies
+3. Enable annotation processing: `File > Settings > Build > Compiler > Annotation Processors > Enable`
+4. Configure Lombok: Install Lombok plugin if not already installed
+5. Set Java version: `File > Project Structure > Project > SDK: Java 21`
 
-#### Step 1.2: Project Structure
-The project uses a multi-module Maven structure:
-- **edtech-parent**: Parent POM managing all modules
-- **edtech-db**: Database layer module
-- **edtech-api**: REST API layer module
-- **edtech-application**: Application layer module
-
-#### Step 1.3: Configure Application Properties
-- Update `edtech-application/src/main/resources/application.properties` with:
-  - Server port (8080)
-  - JPA/Hibernate settings
-  - Database connection settings (use environment variables)
-  - JWT secret key (use environment variable)
-  - JWT expiration time
-- Ensure `application-local.properties` is in `.gitignore` and contains actual database credentials
-
-### Phase 2: Database Layer
-
-#### Step 2.1: Entity Classes
-- **BaseEntity**: Abstract base class with `id` and `internalId` (UUID)
-  - Uses `@SuperBuilder` for Lombok builder pattern
-  - Auto-generates `internalId` on persist
-  
-- **User** entity class in `edtech-db/src/main/java/com/task/edtech/db/entity/`
-  - Extends `BaseEntity`
-  - Fields: email, passwordHash, name, userType, createdAt, updatedAt
-  - JPA annotations (@Entity, @Table, @Id, @GeneratedValue, etc.)
-  - Validation annotations (@NotNull, @Email, etc.)
-  - Relationship: OneToMany with Course
-  - Uses `@SuperBuilder` for inheritance support
-
-- **Course** entity class in `edtech-db/src/main/java/com/task/edtech/db/entity/`
-  - Extends `BaseEntity`
-  - All fields as per schema design
-  - JPA annotations
-  - Validation annotations
-  - Relationship: ManyToOne with User
-  - Enum for CourseMode (ONLINE, IN_PERSON)
-  - Enum for CourseCategory
-  - Uses `@SuperBuilder` for inheritance support
-
-#### Step 2.2: Repository Interfaces
-- **UserRepository** interface extending `JpaRepository<User, Long>`
-  - Method: `findByEmail(String email)`
-  - Method: `findByInternalId(UUID internalId)`
-  - Method: `existsByEmail(String email)`
-  - All methods use `@Query` annotations
-
-- **CourseRepository** interface extending `JpaRepository<Course, Long>`
-  - Method: `getAllByUserId(Long userId)`
-  - Method: `getAllByUserId(Long userId, Pageable pageable)`
-  - Method: `findByUserIdAndTitle(Long userId, String title)`
-  - Method: `countByUserId(Long userId)`
-  - Method: `findByInternalId(UUID internalId)`
-  - Method: `searchCourses(...)` - complex search with filters
-  - All methods use `@Query` annotations
-
-#### Step 2.3: Configure Database
-- Ensure `spring.jpa.hibernate.ddl-auto=update` in properties
-- Run application to create tables automatically
-- Verify tables are created in PostgreSQL
-
-### Phase 3: Security & Authentication
-
-#### Step 3.1: Security Configuration
-- **SecurityConfig** class in `edtech-application/src/main/java/com/task/edtech/services/security/`
-  - Configure password encoder (BCrypt)
-  - Configure JWT authentication filter
-  - Configure public endpoints (signup, login, search)
-  - Configure protected endpoints (all /api/courses/* except search and public)
-  - Disable CSRF for API
-  - Configure CORS (allow frontend origin)
-
-#### Step 3.2: JWT Utility Class
-- **JwtUtil** class in `edtech-db/src/main/java/com/task/edtech/db/security/`
-  - Method: `generateToken(String email, Long id)`
-  - Method: `validateToken(String token)`
-  - Method: `getEmailFromToken(String token)`
-  - Method: `getIdFromToken(String token)`
-
-#### Step 3.3: JWT Authentication Filter
-- **JwtAuthenticationFilter** class in `edtech-application/src/main/java/com/task/edtech/services/security/`
-  - Extends `OncePerRequestFilter`
-  - Extract token from Authorization header
-  - Validate token
-  - Set authentication in SecurityContext
-
-#### Step 3.4: Authentication Service
-- **AuthService** interface in `edtech-db/src/main/java/com/task/edtech/db/service/`
-- **AuthServiceImpl** in `edtech-db/src/main/java/com/task/edtech/db/service/impl/`
-  - Method: `signup(SignupRequest)` - create user, hash password, return JWT
-  - Method: `login(LoginRequest)` - verify credentials, return JWT
-  - Method: `getCurrentUser()` - get user from SecurityContext
-  - Method: `getCurrentUserId()` - get current user's ID
-
-### Phase 4: DTOs & Request/Response Models
-
-#### Step 4.1: Request DTOs
-- **SignupRequest** class with email, password, name, **userType** (required)
-- **LoginRequest** class with email, password
-- **CourseDTO** class with all course fields (used for both create and update)
-
-#### Step 4.2: Response DTOs
-- **AuthResponse** class with token and user info (field named `provider` but contains UserDTO)
-- **UserDTO** class with user information
-- **CourseDTO** class with all course fields
-- **SearchFilters** class for search query parameters
-
-#### Step 4.3: Converter Classes
-- **UserConverter** class in `edtech-db/src/main/java/com/task/edtech/db/converter/`
-  - Method: `toDto(User entity)` - converts User to UserDTO
-  - Method: `toEntity(UserDTO dto)` - converts UserDTO to User
-
-- **CourseConverter** class in `edtech-db/src/main/java/com/task/edtech/db/converter/`
-  - Method: `toDto(Course entity)` - converts Course to CourseDTO
-  - Method: `toEntity(CourseDTO dto, Long userId)` - converts CourseDTO to Course, resolves User foreign key
-
-### Phase 5: Service Layer
-
-#### Step 5.1: User Service
-- **UserService** interface in `edtech-db/src/main/java/com/task/edtech/db/service/`
-- **UserServiceImpl** in `edtech-db/src/main/java/com/task/edtech/db/service/impl/`
-  - Method: `findById(Long id)`
-  - Method: `findByInternalId(UUID internalId)`
-  - Method: `findByEmail(String email)`
-  - Method: `existsByEmail(String email)`
-  - Method: `addOrUpdate(User user)`
-  - Method: `delete(User user)`
-  - Method: `deleteById(Long id)`
-
-#### Step 5.2: Course Service
-- **CourseService** interface in `edtech-db/src/main/java/com/task/edtech/db/service/`
-- **CourseServiceImpl** in `edtech-db/src/main/java/com/task/edtech/db/service/impl/`
-  - Method: `findById(Long courseId)`
-  - Method: `findByInternalId(UUID courseInternalId)`
-  - Method: `findByUserIdAndTitle(Long userId, String title)`
-  - Method: `countByUserId(Long userId)`
-  - Method: `addOrUpdate(Course course)` - handles both create and update
-  - Method: `delete(Course course)`
-  - Method: `publishCourse(UUID courseInternalId)`
-  - Method: `unpublishCourse(UUID courseInternalId)`
-  - Method: `getAllByUserId(Long userId)`
-  - Method: `getAllByUserId(Long userId, Pageable pageable)`
-  - Method: `searchCourses(String pinCode, SearchFilters filters, Pageable pageable)`
-
-### Phase 6: Controller Layer
-
-#### Step 6.1: Authentication Controller
-- **AuthController** class in `edtech-api/src/main/java/com/task/edtech/api/controller/`
-  - Endpoint: `POST /api/auth/signup` - call AuthService.signup
-  - Endpoint: `POST /api/auth/login` - call AuthService.login
-  - Endpoint: `GET /api/auth/me` - call AuthService.getCurrentUser, convert to UserDTO
-
-#### Step 6.2: Course Controller
-- **CourseController** class in `edtech-api/src/main/java/com/task/edtech/api/controller/`
-  - Endpoint: `POST /api/courses` - create course (requires PROVIDER userType)
-  - Endpoint: `GET /api/courses/mine` - get user's courses
-  - Endpoint: `GET /api/courses/{id}` - get course detail (ownership verified)
-  - Endpoint: `PUT /api/courses/{id}` - update course (ownership verified)
-  - Endpoint: `DELETE /api/courses/{id}` - delete course (ownership verified)
-  - Endpoint: `POST /api/courses/{id}/publish` - publish course (ownership verified)
-  - Endpoint: `POST /api/courses/{id}/unpublish` - unpublish course (ownership verified)
-  - Endpoint: `GET /api/courses/search` - search courses with filters (public, no auth required)
-  - All protected endpoints require authentication (get userId from AuthService)
-  - Uses CourseConverter for entity-DTO conversion
-
-### Phase 7: Exception Handling
-
-#### Step 7.1: Custom Exceptions
-- **EntityNotFoundException** class in `edtech-db/src/main/java/com/task/edtech/db/exception/`
-  - Extends RuntimeException
-  - Used when entities are not found
-
-#### Step 7.2: Global Exception Handler (To Be Implemented)
-- Create `GlobalExceptionHandler` class with `@ControllerAdvice`
-  - Handle EntityNotFoundException → 404
-  - Handle validation errors → 400
-  - Handle generic exceptions → 500
-
-### Phase 8: Testing & Validation
-
-#### Step 8.1: Test Database Connection
-- Run application from `edtech-application` module
-- Verify database tables are created
-- Check application logs for any errors
-
-#### Step 8.2: Test Authentication Endpoints
-- Use Postman or curl to test:
-  - Signup endpoint (with userType field)
-  - Login endpoint
-  - Get current user endpoint (with token)
-
-#### Step 8.3: Test Course Management Endpoints
-- Test creating a course (with authentication, as PROVIDER)
-- Test getting user's courses
-- Test updating a course
-- Test deleting a course
-- Test publish/unpublish
-
-#### Step 8.4: Test Search Endpoints
-- Test search by PIN code
-- Test search with filters
-- Test pagination
-- Verify only published and future courses are returned
-
-#### Step 8.5: Validate Business Logic
-- Verify PIN code matching (prefix match)
-- Verify date filtering
-- Verify ownership checks (users can only modify their own courses)
-- Verify only PROVIDER users can create courses
-
-### Phase 9: Final Configuration
-
-#### Step 9.1: Configure CORS
-- Update SecurityConfig to allow frontend origin (http://localhost:3000, http://localhost:5173)
-- Allow necessary HTTP methods (GET, POST, PUT, DELETE)
-- Allow necessary headers (Authorization, Content-Type)
-
-#### Step 9.2: Add Logging
-- Configure logging levels
-- Add logging statements in service methods
-- Log authentication attempts
-- Log course creation/updates
-
-#### Step 9.3: Environment Variables
-- Ensure all sensitive data (DB credentials, JWT secret) are in `application-local.properties`
-- Document required environment variables in README
-
----
 
 ## 🔐 Security Considerations
 
-### Backend Security
+### Security Best Practices
 - Use BCrypt for password hashing (never store plain passwords)
 - Validate all inputs (use Jakarta Bean Validation)
 - Sanitize user inputs to prevent SQL injection (JPA handles this)
@@ -590,21 +613,16 @@ The project uses a multi-module Maven structure:
 - Validate JWT tokens properly
 - Check ownership before allowing course modifications
 - Verify userType before allowing course creation (only PROVIDER)
-
-### Frontend Security
-- Store JWT token securely (localStorage - consider httpOnly cookies for production)
-- Never expose sensitive data in client-side code
-- Validate inputs on frontend (but always validate on backend too)
-- Handle tokens expiration gracefully
-- Implement proper logout (clear tokens)
-- Protect routes based on authentication and userType
+- Configure CORS appropriately for your API clients
+- Never expose sensitive data in API responses
+- Handle token expiration gracefully
 
 ---
 
 ## 📝 Environment Variables
 
-### Backend (`edtech-application/src/main/resources/application-local.properties`)
-```
+### Application Properties (`edtech-application/src/main/resources/application-local.properties`)
+```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/edtech_db
 spring.datasource.username=postgres
 spring.datasource.password=your_password
@@ -612,81 +630,22 @@ app.jwt.secret=your_jwt_secret_key_minimum_256_bits_for_hmac_sha_algorithms
 app.jwt.expiration=86400000
 ```
 
-### Frontend (`.env`)
-```
-REACT_APP_API_BASE_URL=http://localhost:8080/api
-```
+**Important:** 
+- Keep `application-local.properties` in `.gitignore`
+- Use environment variables or secure vaults in production
+- Generate a strong JWT secret (minimum 32 characters/256 bits)
 
 ---
 
-## 🚀 Deployment Considerations
+## 📚 Next Steps & Improvements
 
-### Backend Deployment
-- Build JAR file: `mvn clean package` (from parent directory)
-- Run JAR: `java -jar edtech-application/target/edtech-application-0.0.1-SNAPSHOT.jar`
-- Configure production database
-- Set environment variables for production
-- Use process manager (PM2, systemd)
-- Configure reverse proxy (Nginx)
+1. **Error Handling**
+   - Implement GlobalExceptionHandler
+   - Add structured error responses
+   - Implement error logging and monitoring
 
-### Frontend Deployment
-- Build production bundle: `npm run build`
-- Serve static files (Nginx, Apache, or CDN)
-- Configure API base URL for production
-- Set up HTTPS
-
----
-
-## 📚 Next Steps After Backend Completion
-
-1. Test all API endpoints thoroughly
-2. Document API using Swagger/OpenAPI (optional)
-3. Add unit tests for services
-4. Add integration tests for controllers
-5. Implement GlobalExceptionHandler
-6. Add rate limiting
-7. Set up CI/CD pipeline (optional)
-8. Prepare for frontend integration
-
----
-
-## 📚 Next Steps After Frontend Completion
-
-1. Test end-to-end user flows
-2. Optimize performance
-3. Add analytics (optional)
-4. Set up error tracking (optional)
-5. Deploy to production
-6. Monitor and maintain
-
----
-
-## 🐛 Common Issues & Solutions
-
-### Backend Issues
-- **Database connection error**: Check PostgreSQL is running and credentials are correct
-- **JWT token invalid**: Verify JWT secret is consistent
-- **CORS error**: Update SecurityConfig to allow frontend origin
-- **Table not created**: Check `spring.jpa.hibernate.ddl-auto` setting
-- **Builder compilation error**: Ensure BaseEntity uses `@SuperBuilder` and child entities also use `@SuperBuilder`
-
-### Frontend Issues
-- **API calls failing**: Check CORS configuration and API base URL
-- **Token not persisting**: Check localStorage implementation
-- **Routing not working**: Verify React Router setup
-- **Build errors**: Check Node version and dependencies
-- **401 errors**: Check if token is being sent in Authorization header
-
----
-
-## 📖 Additional Resources
-
-- Spring Boot Documentation: https://spring.io/projects/spring-boot
-- React Documentation: https://react.dev
-- PostgreSQL Documentation: https://www.postgresql.org/docs
-- JWT Documentation: https://jwt.io
-- Lombok Documentation: https://projectlombok.org
-
----
-
-**Note**: This is a step-by-step guide. Follow each phase sequentially. Do not skip steps as later phases depend on earlier ones. Test thoroughly after each phase before moving to the next.
+2. **DevOps**
+   - Set up CI/CD pipeline
+   - Configure automated testing
+   - Set up monitoring and alerting
+   - Implement logging aggregation

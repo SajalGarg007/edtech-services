@@ -3,8 +3,6 @@ package com.task.edtech.db.service.impl;
 import com.task.edtech.db.dto.SearchFilters;
 import com.task.edtech.db.entity.Course;
 import com.task.edtech.db.entity.User;
-import com.task.edtech.db.enums.CourseCategory;
-import com.task.edtech.db.enums.CourseMode;
 import com.task.edtech.db.exception.EntityNotFoundException;
 import com.task.edtech.db.repository.CourseRepository;
 import com.task.edtech.db.service.CourseService;
@@ -13,8 +11,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,14 +89,15 @@ public class CourseServiceImpl implements CourseService {
 
         if (Objects.nonNull(dbCourse)) {
             dbCourse.copy(course);
+            log.info("Updating course with id: {}, title: {}", dbCourse.getId(), dbCourse.getTitle());
         } else {
             dbCourse = course;
+            log.info("Creating new course with title: {}", course.getTitle());
         }
 
-        log.info("adding/updating course with id %s", course.getId());
-        courseRepository.save(dbCourse);
-        log.info("added/updated course with id %s", course.getId());
-        return dbCourse;
+        Course savedCourse = courseRepository.save(dbCourse);
+        log.info("Successfully saved course with id: {}, title: {}", savedCourse.getId(), savedCourse.getTitle());
+        return savedCourse;
     }
 
     @Override
