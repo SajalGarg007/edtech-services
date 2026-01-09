@@ -6,10 +6,10 @@ import com.task.edtech.db.enums.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,13 +17,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "courses")
+@Table(name = "courses", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_course_internal_id", columnNames = "internal_id"),
+    @UniqueConstraint(name = "uk_course_user_title", columnNames = {"user_id", "title"})
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course extends BaseEntity
+public class Course
+        extends BaseEntity
         implements Serializable {
 
     private static final long serialVersionUID = -5075736936745304781L;
@@ -126,6 +130,27 @@ public class Course extends BaseEntity
     @AssertTrue(message = "User must be a PROVIDER to create courses")
     private boolean isValidUserType() {
         return user != null && user.getUserType() == UserType.PROVIDER;
+    }
+
+    public void copy(Course course) {
+        if (course == null) {
+            return;
+        }
+
+        this.user = course.user;
+        this.title = course.title;
+        this.description = course.description;
+        this.category = course.category;
+        this.mode = course.mode;
+        this.address = course.address;
+        this.pinCode = course.pinCode;
+        this.startDate = course.startDate;
+        this.endDate = course.endDate;
+        this.scheduleInfo = course.scheduleInfo;
+        this.priceAmount = course.priceAmount;
+        this.isFree = course.isFree;
+        this.capacity = course.capacity;
+        this.isPublished = course.isPublished;
     }
 }
 
