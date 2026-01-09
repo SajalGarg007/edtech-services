@@ -51,8 +51,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
-                .requestMatchers("/api/courses/search").permitAll()
-                .requestMatchers("/api/courses/*/public").permitAll()
                 
                 // Protected endpoints - all /api/courses/* except search and public
                 .requestMatchers("/api/courses/**").authenticated()

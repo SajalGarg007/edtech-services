@@ -364,12 +364,12 @@ Provider (1) ────< (Many) Course
 - Create `AuthController` class
   - Endpoint: `POST /api/auth/signup` - call AuthService.signup
   - Endpoint: `POST /api/auth/login` - call AuthService.login
-  - Endpoint: `GET /api/auth/me` - call AuthService.getCurrentProvider
+  - Endpoint: `GET /api/auth/me` - call AuthService.getCurrentUser
 
 #### Step 6.2: Create Course Controller (Provider)
 - Create `CourseController` class
   - Endpoint: `POST /api/courses` - create course
-  - Endpoint: `GET /api/courses/mine` - get provider's courses
+  - Endpoint: `GET /api/courses/mine` - get users's courses
   - Endpoint: `GET /api/courses/{id}` - get course detail
   - Endpoint: `PUT /api/courses/{id}` - update course
   - Endpoint: `DELETE /api/courses/{id}` - delete course

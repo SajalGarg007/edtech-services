@@ -18,6 +18,7 @@
 
     <modules>
         <module>edtech-db</module>
+        <module>edtech-api</module>
         <module>edtech-application</module>
     </modules>
 
@@ -31,6 +32,11 @@
             <dependency>
                 <groupId>com.task</groupId>
                 <artifactId>edtech-db</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.task</groupId>
+                <artifactId>edtech-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

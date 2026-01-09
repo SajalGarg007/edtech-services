@@ -72,7 +72,7 @@ public class CourseServiceImpl implements CourseService {
             }
         }
         if (Objects.isNull(user)) {
-            throw new RuntimeException("Create added user for this course");
+            throw new RuntimeException("Create provider user for this course");
         } else {
             course.setUser(user);
         }

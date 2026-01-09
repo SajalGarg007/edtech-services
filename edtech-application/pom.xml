@@ -21,6 +21,13 @@
 			<version>${project.version}</version>
 		</dependency>
 		
+		<!-- EdTech API Module -->
+		<dependency>
+			<groupId>com.task</groupId>
+			<artifactId>edtech-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
 		<!-- Spring Boot Starter (includes autoconfigure) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

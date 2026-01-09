@@ -1,5 +1,6 @@
 package com.task.edtech.db.service.impl;
 
+import com.task.edtech.db.converter.UserConverter;
 import com.task.edtech.db.dto.AuthResponse;
 import com.task.edtech.db.dto.LoginRequest;
 import com.task.edtech.db.dto.UserDTO;
@@ -8,6 +9,7 @@ import com.task.edtech.db.entity.User;
 import com.task.edtech.db.repository.UserRepository;
 import com.task.edtech.db.security.JwtUtil;
 import com.task.edtech.db.service.AuthService;
+import com.task.edtech.db.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +25,10 @@ public class AuthServiceImpl
         implements AuthService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
+    @Autowired
+    private UserConverter userConverter;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -34,7 +39,7 @@ public class AuthServiceImpl
     @Override
     public AuthResponse signup(SignupRequest signupRequest) {
 
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+        if (userService.existsByEmail(signupRequest.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
 
@@ -42,21 +47,14 @@ public class AuthServiceImpl
                 .email(signupRequest.getEmail())
                 .passwordHash(passwordEncoder.encode(signupRequest.getPassword()))
                 .name(signupRequest.getName())
+                .userType(signupRequest.getUserType())
                 .build();
 
-        User dbUser = userRepository.save(user);
+        User dbUser = userService.addOrUpdate(user);
 
         String token = jwtUtil.generateToken(dbUser.getEmail(), dbUser.getId());
 
-        UserDTO userDTO = new UserDTO(
-                dbUser.getId(),
-                dbUser.getInternalId(),
-                dbUser.getEmail(),
-                dbUser.getName(),
-                dbUser.getUserType(),
-                dbUser.getCreatedAt(),
-                dbUser.getUpdatedAt()
-        );
+        UserDTO userDTO = userConverter.toDto(dbUser);
 
         return new AuthResponse(token, userDTO);
     }
@@ -64,13 +62,7 @@ public class AuthServiceImpl
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
 
-        Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
-
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Invalid email or password");
-        }
-
-        User user = userOpt.get();
+        User user = userService.findByEmail(loginRequest.getEmail());
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
@@ -78,15 +70,7 @@ public class AuthServiceImpl
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
-        UserDTO userDTO = new UserDTO(
-                user.getId(),
-                user.getInternalId(),
-                user.getEmail(),
-                user.getName(),
-                user.getUserType(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
+        UserDTO userDTO = userConverter.toDto(user);
 
         return new AuthResponse(token, userDTO);
     }
@@ -101,13 +85,7 @@ public class AuthServiceImpl
 
         String email = authentication.getName();
 
-        Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-
-        return userOpt.get();
+        return userService.findByEmail(email);
     }
 
     @Override
