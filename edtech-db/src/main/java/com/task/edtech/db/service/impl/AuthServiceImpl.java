@@ -2,7 +2,7 @@ package com.task.edtech.db.service.impl;
 
 import com.task.edtech.db.dto.AuthResponse;
 import com.task.edtech.db.dto.LoginRequest;
-import com.task.edtech.db.dto.ProviderResponse;
+import com.task.edtech.db.dto.UserDTO;
 import com.task.edtech.db.dto.SignupRequest;
 import com.task.edtech.db.entity.User;
 import com.task.edtech.db.repository.UserRepository;
@@ -38,73 +38,81 @@ public class AuthServiceImpl
             throw new RuntimeException("Email already exists");
         }
 
-        User provider = User.builder()
+        User user = User.builder()
                 .email(signupRequest.getEmail())
                 .passwordHash(passwordEncoder.encode(signupRequest.getPassword()))
                 .name(signupRequest.getName())
                 .build();
 
-        User savedProvider = userRepository.save(provider);
+        User dbUser = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(savedProvider.getEmail(), savedProvider.getId());
+        String token = jwtUtil.generateToken(dbUser.getEmail(), dbUser.getId());
 
-        ProviderResponse providerResponse = new ProviderResponse(
-                savedProvider.getId(),
-                savedProvider.getEmail(),
-                savedProvider.getName()
+        UserDTO userDTO = new UserDTO(
+                dbUser.getId(),
+                dbUser.getInternalId(),
+                dbUser.getEmail(),
+                dbUser.getName(),
+                dbUser.getUserType(),
+                dbUser.getCreatedAt(),
+                dbUser.getUpdatedAt()
         );
 
-        return new AuthResponse(token, providerResponse);
+        return new AuthResponse(token, userDTO);
     }
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
 
-        Optional<User> providerOpt = userRepository.findByEmail(loginRequest.getEmail());
+        Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
 
-        if (providerOpt.isEmpty()) {
+        if (userOpt.isEmpty()) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        User provider = providerOpt.get();
+        User user = userOpt.get();
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), provider.getPasswordHash())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        String token = jwtUtil.generateToken(provider.getEmail(), provider.getId());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
-        ProviderResponse providerResponse = new ProviderResponse(
-                provider.getId(),
-                provider.getEmail(),
-                provider.getName()
+        UserDTO userDTO = new UserDTO(
+                user.getId(),
+                user.getInternalId(),
+                user.getEmail(),
+                user.getName(),
+                user.getUserType(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
 
-        return new AuthResponse(token, providerResponse);
+        return new AuthResponse(token, userDTO);
     }
 
     @Override
-    public User getCurrentProvider() {
+    public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("No authenticated provider found");
+            throw new RuntimeException("No authenticated user found");
         }
 
         String email = authentication.getName();
 
-        Optional<User> providerOpt = userRepository.findByEmail(email);
+        Optional<User> userOpt = userRepository.findByEmail(email);
 
-        if (providerOpt.isEmpty()) {
-            throw new RuntimeException("Provider not found");
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found");
         }
 
-        return providerOpt.get();
+        return userOpt.get();
     }
 
     @Override
-    public Long getCurrentProviderId() {
-        return getCurrentProvider().getId();
+    public Long getCurrentUserId() {
+        return getCurrentUser().getId();
     }
 }
 
