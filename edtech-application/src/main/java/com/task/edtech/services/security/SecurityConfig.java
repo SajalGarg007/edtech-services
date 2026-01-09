@@ -54,7 +54,7 @@ public class SecurityConfig {
                 
                 // Protected endpoints - all /api/courses/* except search and public
                 .requestMatchers("/api/courses/**").authenticated()
-                .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                 
                 // Allow all other requests (for now)
                 .anyRequest().permitAll()

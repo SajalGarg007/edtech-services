@@ -14,4 +14,6 @@ public interface AuthService {
     User getCurrentUser();
 
     Long getCurrentUserId();
+
+    void logout();
 }

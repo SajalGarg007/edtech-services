@@ -92,5 +92,11 @@ public class AuthServiceImpl
     public Long getCurrentUserId() {
         return getCurrentUser().getId();
     }
+
+    @Override
+    public void logout() {
+        // Clear the security context
+        SecurityContextHolder.clearContext();
+    }
 }
 

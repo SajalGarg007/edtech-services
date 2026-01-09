@@ -41,5 +41,11 @@ public class AuthController {
         UserDTO userDTO = userConverter.toDto(user);
         return ResponseEntity.ok(userDTO);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        authService.logout();
+        return ResponseEntity.ok().build();
+    }
 }
 
