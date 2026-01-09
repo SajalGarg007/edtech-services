@@ -9,11 +9,14 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseDTO {
+
+    private UUID id;
 
     @NotBlank(message = "Title is required")
     @Size(max = 200, message = "Title must not exceed 200 characters")
@@ -47,4 +50,6 @@ public class CourseDTO {
 
     @Min(value = 1, message = "Capacity must be at least 1")
     private Integer capacity;
+
+    private Boolean isPublished = false;
 }

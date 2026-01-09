@@ -7,6 +7,8 @@ import com.task.edtech.db.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class CourseConverter {
@@ -17,6 +19,7 @@ public class CourseConverter {
         if (entity == null) return null;
 
         CourseDTO dto = new CourseDTO();
+        dto.setId(entity.getInternalId());
         dto.setTitle(entity.getTitle());
         dto.setDescription(entity.getDescription());
         dto.setCategory(entity.getCategory());
@@ -29,6 +32,7 @@ public class CourseConverter {
         dto.setPriceAmount(entity.getPriceAmount());
         dto.setIsFree(entity.getIsFree());
         dto.setCapacity(entity.getCapacity());
+        dto.setIsPublished(entity.getIsPublished());
 
         return dto;
     }
@@ -37,6 +41,7 @@ public class CourseConverter {
         if (dto == null) return null;
 
         Course entity = Course.builder()
+                .internalId(dto.getId())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .category(dto.getCategory())
@@ -49,7 +54,7 @@ public class CourseConverter {
                 .priceAmount(dto.getPriceAmount())
                 .isFree(dto.getIsFree() != null ? dto.getIsFree() : false)
                 .capacity(dto.getCapacity())
-                .isPublished(false)
+                .isPublished(Objects.nonNull(dto.getIsPublished()) ? dto.getIsPublished() : false)
                 .build();
 
         if (userId != null) {

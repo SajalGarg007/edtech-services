@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -64,7 +65,7 @@ public class CourseController {
         return ResponseEntity.ok(courseDTOs);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{courseId}")
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable @NotNull Long id) {
         Long userId = authService.getCurrentUserId();
         Course course = courseService.findById(id);
@@ -77,7 +78,7 @@ public class CourseController {
         return ResponseEntity.ok(courseDTO);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{courseId}")
     public ResponseEntity<CourseDTO> updateCourse(
             @PathVariable @NotNull Long id,
             @Valid @RequestBody CourseDTO courseDTO) {
@@ -95,11 +96,11 @@ public class CourseController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable @NotNull Long id) {
+    @DeleteMapping("/{courseId}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable @NotNull UUID courseId) {
         Long userId = authService.getCurrentUserId();
 
-        Course course = courseService.findById(id);
+        Course course = courseService.findByInternalId(courseId);
         if (!course.getUser().getId().equals(userId)) {
             throw new EntityNotFoundException("Course not found or access denied");
         }
@@ -108,11 +109,11 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/publish")
-    public ResponseEntity<CourseDTO> publishCourse(@PathVariable @NotNull Long id) {
+    @PostMapping("/{courseId}/publish")
+    public ResponseEntity<CourseDTO> publishCourse(@PathVariable @NotNull UUID courseId) {
         Long userId = authService.getCurrentUserId();
 
-        Course course = courseService.findById(id);
+        Course course = courseService.findByInternalId(courseId);
         if (!course.getUser().getId().equals(userId)) {
             throw new EntityNotFoundException("Course not found or access denied");
         }
@@ -122,11 +123,11 @@ public class CourseController {
         return ResponseEntity.ok(courseDTO);
     }
 
-    @PostMapping("/{id}/unpublish")
-    public ResponseEntity<CourseDTO> unpublishCourse(@PathVariable @NotNull Long id) {
+    @PostMapping("/{courseId}/unpublish")
+    public ResponseEntity<CourseDTO> unpublishCourse(@PathVariable @NotNull UUID courseId) {
         Long userId = authService.getCurrentUserId();
 
-        Course course = courseService.findById(id);
+        Course course = courseService.findByInternalId(courseId);
         if (!course.getUser().getId().equals(userId)) {
             throw new EntityNotFoundException("Course not found or access denied");
         }
