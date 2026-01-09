@@ -63,8 +63,7 @@ public interface CourseService {
             @NotNull LocalDate date,
             @NotNull Pageable pageable);
 
-    Page<Course> searchCourses(
-            @NotNull String pinCode,
-            @Nullable SearchFilters filters,
-            @NotNull Pageable pageable);
+    List<Course> searchCourses(
+            @Nullable String pinCode,
+            @Nullable SearchFilters filters);
 }

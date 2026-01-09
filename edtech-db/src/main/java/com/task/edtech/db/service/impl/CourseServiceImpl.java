@@ -183,31 +183,38 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<Course> searchCourses(
-            @NotNull String pinCode,
-            @Nullable SearchFilters filters,
-            @NotNull Pageable pageable) {
-
-        if (pinCode == null || pinCode.isBlank()) {
-            throw new RuntimeException("PIN code is required");
-        }
+    public List<Course> searchCourses(
+            @Nullable String pinCode,
+            @Nullable SearchFilters filters) {
 
         LocalDate startFrom = filters != null && filters.getStartFrom() != null
                 ? filters.getStartFrom()
                 : LocalDate.now();
 
-        String searchPinCode = filters != null && filters.getPinCode() != null
+        // Determine which pinCode to use: filterPinCode takes precedence, then pinCode parameter
+        String searchPinCode = filters != null && filters.getPinCode() != null && !filters.getPinCode().isBlank()
                 ? filters.getPinCode()
-                : pinCode;
+                : (pinCode != null && !pinCode.isBlank() ? pinCode : null);
 
-        return courseRepository.searchCourses(
-                searchPinCode,
+        // Construct the LIKE pattern only if pinCode is not null/blank
+        // This avoids the PostgreSQL type error when CONCAT is called with NULL
+        String pinCodePattern = (searchPinCode != null && !searchPinCode.isBlank())
+                ? searchPinCode + "%"
+                : null;
+
+        log.debug("Searching courses with pinCodePattern: {}, startFrom: {}, filters: {}", 
+                pinCodePattern, startFrom, filters);
+
+        List<Course> results = courseRepository.searchCourses(
+                pinCodePattern,
                 filters != null ? filters.getCategory() : null,
                 filters != null ? filters.getMode() : null,
                 filters != null ? filters.getIsFree() : null,
                 startFrom,
-                filters != null ? filters.getStartTo() : null,
-                pageable
+                filters != null ? filters.getStartTo() : null
         );
+
+        log.debug("Found {} courses matching search criteria", results.size());
+        return results;
     }
 }

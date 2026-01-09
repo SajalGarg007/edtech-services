@@ -77,14 +77,14 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE " +
             "c.isPublished = true AND " +
             "c.startDate >= :startFrom AND " +
-            "(:pinCode IS NULL OR c.pinCode IS NULL OR c.pinCode LIKE CONCAT(:pinCode, '%')) AND " +
+            "(:pinCodePattern IS NULL OR (c.pinCode IS NOT NULL AND c.pinCode LIKE :pinCodePattern)) AND " +
             "(:category IS NULL OR c.category = :category) AND " +
             "(:mode IS NULL OR c.mode = :mode) AND " +
             "(:isFree IS NULL OR c.isFree = :isFree) AND " +
             "(:startTo IS NULL OR c.startDate <= :startTo) " +
             "ORDER BY c.startDate ASC")
     List<Course> searchCourses(
-            @Param("pinCode") String pinCode,
+            @Param("pinCodePattern") String pinCodePattern,
             @Param("category") CourseCategory category,
             @Param("mode") CourseMode mode,
             @Param("isFree") Boolean isFree,

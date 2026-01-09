@@ -11,13 +11,10 @@ import com.task.edtech.db.enums.UserType;
 import com.task.edtech.db.exception.EntityNotFoundException;
 import com.task.edtech.db.service.AuthService;
 import com.task.edtech.db.service.CourseService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,9 +63,9 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}")
-    public ResponseEntity<CourseDTO> getCourseById(@PathVariable @NotNull Long id) {
+    public ResponseEntity<CourseDTO> getCourseById(@PathVariable @NotNull UUID courseId) {
         Long userId = authService.getCurrentUserId();
-        Course course = courseService.findById(id);
+        Course course = courseService.findByInternalId(courseId);
 
         if (!course.getUser().getId().equals(userId)) {
             throw new EntityNotFoundException("Course not found or access denied");
@@ -80,11 +77,11 @@ public class CourseController {
 
     @PutMapping("/{courseId}")
     public ResponseEntity<CourseDTO> updateCourse(
-            @PathVariable @NotNull Long id,
+            @PathVariable @NotNull UUID courseId,
             @Valid @RequestBody CourseDTO courseDTO) {
         Long userId = authService.getCurrentUserId();
 
-        Course existingCourse = courseService.findById(id);
+        Course existingCourse = courseService.findByInternalId(courseId);
         if (!existingCourse.getUser().getId().equals(userId)) {
             throw new EntityNotFoundException("Course not found or access denied");
         }
@@ -138,18 +135,14 @@ public class CourseController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<CourseDTO>> searchCourses(
-            @RequestParam @NotNull String pinCode,
+    public ResponseEntity<List<CourseDTO>> searchCourses(
+            @RequestParam @Nullable String pinCode,
             @RequestParam(required = false) String filterPinCode,
             @RequestParam(required = false) CourseCategory category,
             @RequestParam(required = false) CourseMode mode,
             @RequestParam(required = false) Boolean isFree,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "startDate") String sortBy,
-            @RequestParam(defaultValue = "ASC") Sort.Direction sortDir) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTo) {
 
         SearchFilters filters = new SearchFilters();
         filters.setPinCode(filterPinCode);
@@ -159,12 +152,11 @@ public class CourseController {
         filters.setStartFrom(startFrom);
         filters.setStartTo(startTo);
 
-        Sort sort = Sort.by(sortDir, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        List<Course> courses = courseService.searchCourses(pinCode, filters);
 
-        Page<Course> courses = courseService.searchCourses(pinCode, filters, pageable);
-
-        Page<CourseDTO> courseDTOs = courses.map(courseConverter::toDto);
+        List<CourseDTO> courseDTOs = courses.stream()
+                .map(courseConverter::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(courseDTOs);
     }
