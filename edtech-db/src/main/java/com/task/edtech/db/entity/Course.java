@@ -17,10 +17,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "courses", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_course_internal_id", columnNames = "internal_id"),
-    @UniqueConstraint(name = "uk_course_user_title", columnNames = {"user_id", "title"})
-})
+@Table(name = "courses", 
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_course_internal_id", columnNames = "internal_id"),
+        @UniqueConstraint(name = "uk_course_user_title", columnNames = {"user_id", "title"})
+    },
+    indexes = {
+        @Index(name = "idx_course_internal_id", columnList = "internal_id"),
+        @Index(name = "idx_course_user_title", columnList = "user_id,title")
+    })
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
