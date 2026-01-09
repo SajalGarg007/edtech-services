@@ -36,44 +36,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.user.id = :userId")
     List<Course> getAllByUserId(@NotNull @Param("userId") Long userId);
 
-    @Query("SELECT c FROM Course c WHERE c.user.id = :userId")
-    Page<Course> getAllByUserId(
-            @NotNull @Param("userId") Long userId,
-            Pageable pageable);
-
-    @Query("SELECT c FROM Course c WHERE c.pinCode LIKE CONCAT(:pinPrefix, '%') " +
-           "AND c.isPublished = true AND c.startDate >= :date")
-    List<Course> getAllByPinCodeStartingWithAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @Param("pinPrefix") String pinPrefix,
-            @Param("date") LocalDate date);
-
-    @Query("SELECT c FROM Course c WHERE c.pinCode = :pinCode " +
-           "AND c.isPublished = true AND c.startDate >= :date")
-    List<Course> getAllByPinCodeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @Param("pinCode") String pinCode,
-            @Param("date") LocalDate date);
-
-    @Query("SELECT c FROM Course c WHERE c.category = :category " +
-           "AND c.isPublished = true AND c.startDate >= :date")
-    Page<Course> getAllByCategoryAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @Param("category") CourseCategory category, 
-            @Param("date") LocalDate date, 
-            Pageable pageable);
-
-    @Query("SELECT c FROM Course c WHERE c.mode = :mode " +
-           "AND c.isPublished = true AND c.startDate >= :date")
-    Page<Course> getAllByModeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @Param("mode") CourseMode mode, 
-            @Param("date") LocalDate date, 
-            Pageable pageable);
-
-    @Query("SELECT c FROM Course c WHERE c.isFree = :isFree " +
-           "AND c.isPublished = true AND c.startDate >= :date")
-    Page<Course> getAllByIsFreeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @Param("isFree") Boolean isFree, 
-            @Param("date") LocalDate date, 
-            Pageable pageable);
-
     @Query("SELECT c FROM Course c WHERE " +
             "c.isPublished = true AND " +
             "c.startDate >= :startFrom AND " +

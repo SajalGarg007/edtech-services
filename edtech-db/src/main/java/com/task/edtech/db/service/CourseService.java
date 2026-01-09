@@ -36,33 +36,6 @@ public interface CourseService {
 
     List<Course> getAllByUserId(@NotNull Long userId);
 
-    Page<Course> getAllByUserId(
-            @NotNull Long userId,
-            @NotNull Pageable pageable);
-
-    List<Course> getAllByPinCodeStartingWithAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull String pinPrefix,
-            @NotNull LocalDate date);
-
-    List<Course> getAllByPinCodeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull String pinCode,
-            @NotNull LocalDate date);
-
-    Page<Course> getAllByCategoryAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull CourseCategory category,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable);
-
-    Page<Course> getAllByModeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull CourseMode mode,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable);
-
-    Page<Course> getAllByIsFreeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull Boolean isFree,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable);
-
     List<Course> searchCourses(
             @Nullable String pinCode,
             @Nullable SearchFilters filters);

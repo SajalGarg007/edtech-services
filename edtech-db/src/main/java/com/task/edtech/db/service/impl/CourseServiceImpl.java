@@ -133,56 +133,6 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<Course> getAllByUserId(
-            @NotNull Long userId,
-            @NotNull Pageable pageable) {
-        return courseRepository.getAllByUserId(userId, pageable);
-    }
-
-    @Override
-    public List<Course> getAllByPinCodeStartingWithAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull String pinPrefix,
-            @NotNull LocalDate date) {
-        return courseRepository.getAllByPinCodeStartingWithAndIsPublishedTrueAndStartDateGreaterThanEqual(
-                pinPrefix, date);
-    }
-
-    @Override
-    public List<Course> getAllByPinCodeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull String pinCode,
-            @NotNull LocalDate date) {
-        return courseRepository.getAllByPinCodeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-                pinCode, date);
-    }
-
-    @Override
-    public Page<Course> getAllByCategoryAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull CourseCategory category,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable) {
-        return courseRepository.getAllByCategoryAndIsPublishedTrueAndStartDateGreaterThanEqual(
-                category, date, pageable);
-    }
-
-    @Override
-    public Page<Course> getAllByModeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull CourseMode mode,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable) {
-        return courseRepository.getAllByModeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-                mode, date, pageable);
-    }
-
-    @Override
-    public Page<Course> getAllByIsFreeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-            @NotNull Boolean isFree,
-            @NotNull LocalDate date,
-            @NotNull Pageable pageable) {
-        return courseRepository.getAllByIsFreeAndIsPublishedTrueAndStartDateGreaterThanEqual(
-                isFree, date, pageable);
-    }
-
-    @Override
     public List<Course> searchCourses(
             @Nullable String pinCode,
             @Nullable SearchFilters filters) {
